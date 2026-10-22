@@ -22,6 +22,18 @@
     mode: "0644"
   notify: apply sysctl
 
+- name: Отключить сетевую конфигурацию cloud-init
+  ansible.builtin.copy:
+    dest: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+    content: "network: {config: disabled}\n"
+    mode: "0644"
+
+- name: Удалить 50-cloud-init.yaml (enp0s3 = altname eth0, включал DHCP со шлюзом)
+  ansible.builtin.file:
+    path: /etc/netplan/50-cloud-init.yaml
+    state: absent
+  notify: netplan apply
+
 - name: Netplan — адреса и маршруты
   ansible.builtin.template:
     src: 50-otus.yaml.j2
