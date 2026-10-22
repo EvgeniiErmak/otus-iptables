@@ -60,6 +60,7 @@ Vagrant.configure("2") do |config|
           ansible.playbook           = "ansible/playbook.yml"
           ansible.limit              = "all"
           ansible.compatibility_mode = "2.0"
+          ansible.extra_vars         = { star: ENV.fetch("STAR", "false") }
         end
       end
     end
