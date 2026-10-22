@@ -96,3 +96,30 @@ vagrant ssh centralServer -c "ip r | grep default; sudo traceroute -n -I -m 3 8.
 - [Iptables Tutorial (Oskar Andreasson)](https://www.frozentux.net/iptables-tutorial/iptables-tutorial.html)
 - [Habr: Port knocking](https://habr.com/ru/articles/136871/)
 - [Блокировать ли ICMP-трафик](https://14bytes.ru/blokirovat-li-icmp-trafik-bezopasno-li/)
+
+## Проблемы при выполнении и их решение
+
+1. **Лишний default route через eth0 (VirtualBox NAT) на centralRouter и centralServer.**
+   После `netplan apply` с `dhcp4-overrides: use-routes: false` маршрут `default via 10.0.2.2 dev eth0 proto dhcp`
+   оставался, а после перезагрузки появлялся снова.
+   Причина: cloud-init при загрузке создаёт `/etc/netplan/50-cloud-init.yaml` с `enp0s3: dhcp4: true`,
+   а `enp0s3` — альтернативное имя eth0 (`networkctl status eth0` → `Network File: 10-netplan-enp0s3.network`).
+   Решение (роль [common](ansible/roles/common/)): отключена сетевая конфигурация cloud-init
+   (`/etc/cloud/cloud.cfg.d/99-disable-network-config.cfg`), удалён `50-cloud-init.yaml`,
+   eth0 переведён на статический `10.0.2.15/24` без шлюза, оставшийся DHCP-маршрут удаляется.
+   Проверено перезагрузкой ВМ (`vagrant reload`).
+
+2. **`vagrant ssh -c` в цикле `for` выполнялся только для первой ВМ.**
+   `vagrant ssh` читает stdin и «съедает» остальные команды. Решение: `vagrant ssh <vm> -c "..." < /dev/null`.
+
+3. **`curl` с хоста к `192.168.56.10:8080` уходил в прокси.**
+   На хосте настроен прокси. Решение: `curl --noproxy '*' http://192.168.56.10:8080/`.
+
+4. **Предупреждение Vagrant `You assigned a static IP ending in ".1"`.**
+   Для inetRouter (`192.168.255.1`) и centralRouter (`192.168.0.1`) адрес `.1` выбран намеренно — это шлюзы. На работу не влияет.
+
+5. **`traceroute` от centralServer к хосту `192.168.56.1` после inetRouter2 показывает `* * *`.**
+   Это ожидаемо: на inetRouter2 `FORWARD DROP`, разрешены только TCP/80 к centralServer и ответы (ESTABLISHED,RELATED).
+
+6. **Отклонённый push после загрузки скриншотов через браузер.**
+   Локальная копия отстаёт от GitHub. Решение: `git pull --rebase` перед следующим push.
