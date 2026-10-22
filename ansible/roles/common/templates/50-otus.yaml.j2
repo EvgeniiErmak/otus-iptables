@@ -3,10 +3,15 @@ network:
   version: 2
   ethernets:
     eth0:
+{% if eth0_default_route | bool %}
       dhcp4: true
-{% if not eth0_default_route | bool %}
-      dhcp4-overrides:
-        use-routes: false
+{% else %}
+      # VirtualBox NAT: только для vagrant ssh, без шлюза — default идёт через inetRouter
+      dhcp4: false
+      addresses:
+        - 10.0.2.15/24
+      nameservers:
+        addresses: [10.0.2.3]
 {% endif %}
 {% for iface in interfaces %}
 {% set routes = (iface.routes | default([])) + ((iface.star_routes | default([])) if (star | bool) else []) %}

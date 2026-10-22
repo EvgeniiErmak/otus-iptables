@@ -35,3 +35,10 @@
 
 - name: Применить изменения сразу
   ansible.builtin.meta: flush_handlers
+
+- name: Удалить default через eth0, оставшийся от DHCP (default только через inetRouter)
+  ansible.builtin.shell: ip route del default via 10.0.2.2 dev eth0
+  register: del_default
+  changed_when: del_default.rc == 0
+  failed_when: false
+  when: not eth0_default_route | bool
