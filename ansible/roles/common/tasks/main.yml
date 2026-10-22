@@ -1,0 +1,37 @@
+---
+- name: Ответы debconf для iptables-persistent (без интерактива)
+  ansible.builtin.debconf:
+    name: iptables-persistent
+    question: "{{ item }}"
+    value: "false"
+    vtype: boolean
+  loop:
+    - iptables-persistent/autosave_v4
+    - iptables-persistent/autosave_v6
+
+- name: Установка пакетов
+  ansible.builtin.apt:
+    name: [iptables, iptables-persistent, netfilter-persistent, conntrack, traceroute, tcpdump, curl]
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: net.ipv4.ip_forward
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/90-ip-forward.conf
+    content: "net.ipv4.ip_forward = {{ '1' if ip_forward | bool else '0' }}\n"
+    mode: "0644"
+  notify: apply sysctl
+
+- name: Netplan — адреса и маршруты
+  ansible.builtin.template:
+    src: 50-otus.yaml.j2
+    dest: /etc/netplan/50-otus.yaml
+    mode: "0600"
+  notify: netplan apply
+
+- name: Права 600 на файлы netplan (убрать предупреждения)
+  ansible.builtin.shell: chmod 600 /etc/netplan/*.yaml
+  changed_when: false
+
+- name: Применить изменения сразу
+  ansible.builtin.meta: flush_handlers

@@ -1,0 +1,20 @@
+# {{ ansible_managed }}
+# inetRouter2: проброс 192.168.56.10:8080 -> centralServer 192.168.0.2:80
+# star={{ star | bool }} ({{ 'без маскарадинга' if star | bool else 'с маскарадингом' }})
+*nat
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+-A PREROUTING -i eth2 -p tcp -m tcp --dport 8080 -j DNAT --to-destination 192.168.0.2:80
+{% if not star | bool %}
+-A POSTROUTING -o eth1 -d 192.168.0.2/32 -p tcp -m tcp --dport 80 -j MASQUERADE
+{% endif %}
+COMMIT
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+-A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+-A FORWARD -i eth2 -o eth1 -d 192.168.0.2/32 -p tcp -m tcp --dport 80 -m conntrack --ctstate NEW -j ACCEPT
+COMMIT

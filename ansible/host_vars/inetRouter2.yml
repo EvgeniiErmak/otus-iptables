@@ -1,0 +1,10 @@
+---
+ip_forward: true
+eth0_default_route: true          # собственный выход inetRouter2 (для apt)
+interfaces:
+  - name: eth1
+    addr: 192.168.255.6/30
+    routes:
+      - { to: 192.168.0.0/28, via: 192.168.255.5 }
+  - name: eth2
+    addr: 192.168.56.10/24

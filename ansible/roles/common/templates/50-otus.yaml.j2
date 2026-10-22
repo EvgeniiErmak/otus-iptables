@@ -1,0 +1,23 @@
+# {{ ansible_managed }}
+network:
+  version: 2
+  ethernets:
+    eth0:
+      dhcp4: true
+{% if not eth0_default_route | bool %}
+      dhcp4-overrides:
+        use-routes: false
+{% endif %}
+{% for iface in interfaces %}
+{% set routes = (iface.routes | default([])) + ((iface.star_routes | default([])) if (star | bool) else []) %}
+    {{ iface.name }}:
+      addresses:
+        - {{ iface.addr }}
+{% if routes %}
+      routes:
+{% for r in routes %}
+        - to: {{ r.to }}
+          via: {{ r.via }}
+{% endfor %}
+{% endif %}
+{% endfor %}

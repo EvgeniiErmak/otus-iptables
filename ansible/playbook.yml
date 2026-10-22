@@ -1,0 +1,25 @@
+---
+- name: Общие настройки (пакеты, ip_forward, сеть/маршруты)
+  hosts: all
+  become: true
+  roles: [common]
+
+- name: inetRouter — NAT в интернет + port knocking
+  hosts: inetRouter
+  become: true
+  roles: [inet_router]
+
+- name: centralRouter — knock-скрипт
+  hosts: centralRouter
+  become: true
+  roles: [central_router]
+
+- name: centralServer — nginx
+  hosts: centralServer
+  become: true
+  roles: [central_server]
+
+- name: inetRouter2 — проброс 8080 -> centralServer:80
+  hosts: inetRouter2
+  become: true
+  roles: [inet_router2]

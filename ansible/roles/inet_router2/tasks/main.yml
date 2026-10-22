@@ -1,0 +1,12 @@
+---
+- name: Правила iptables (DNAT 8080 -> 192.168.0.2:80)
+  ansible.builtin.template:
+    src: rules.v4.j2
+    dest: /etc/iptables/rules.v4
+    mode: "0640"
+  notify: restore iptables
+
+- name: Загрузка правил при старте
+  ansible.builtin.systemd:
+    name: netfilter-persistent
+    enabled: true

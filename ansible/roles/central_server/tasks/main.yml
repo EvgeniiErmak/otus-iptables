@@ -1,0 +1,18 @@
+---
+- name: Установка nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+
+- name: Стартовая страница
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    mode: "0644"
+
+- name: nginx запущен и в автозагрузке
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true

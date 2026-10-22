@@ -1,0 +1,8 @@
+---
+ip_forward: true
+eth0_default_route: true          # inetRouter — выход в интернет через eth0 (NAT VirtualBox)
+interfaces:
+  - name: eth1
+    addr: 192.168.255.1/30
+    routes:
+      - { to: 192.168.0.0/16, via: 192.168.255.2 }

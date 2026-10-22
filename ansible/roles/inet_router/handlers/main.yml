@@ -1,0 +1,8 @@
+---
+- name: restore iptables
+  ansible.builtin.shell: iptables-restore < /etc/iptables/rules.v4
+
+- name: restart ssh
+  ansible.builtin.service:
+    name: ssh
+    state: restarted

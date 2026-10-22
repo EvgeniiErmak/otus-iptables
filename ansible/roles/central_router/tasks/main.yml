@@ -1,0 +1,11 @@
+---
+- name: nmap для knock-скрипта
+  ansible.builtin.apt:
+    name: nmap
+    state: present
+
+- name: knock.sh
+  ansible.builtin.copy:
+    src: knock.sh
+    dest: /usr/local/bin/knock.sh
+    mode: "0755"

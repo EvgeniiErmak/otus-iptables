@@ -1,0 +1,4 @@
+---
+# false — основное задание (проброс с маскарадингом)
+# true  — задание со * (проброс без маскарадинга): ansible-playbook ansible/playbook.yml -e star=true
+star: false

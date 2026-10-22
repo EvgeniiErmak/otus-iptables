@@ -1,0 +1,14 @@
+---
+ip_forward: true
+eth0_default_route: false         # default только через inetRouter
+interfaces:
+  - name: eth1
+    addr: 192.168.255.2/30
+    routes:
+      - { to: default, via: 192.168.255.1 }
+  - name: eth2
+    addr: 192.168.0.1/28
+  - name: eth3
+    addr: 192.168.255.5/30
+    star_routes:                  # только для задания со *: обратный путь к хосту через inetRouter2
+      - { to: 192.168.56.0/24, via: 192.168.255.6 }

@@ -1,0 +1,19 @@
+---
+- name: Правила iptables (NAT + port knocking)
+  ansible.builtin.template:
+    src: rules.v4.j2
+    dest: /etc/iptables/rules.v4
+    mode: "0640"
+  notify: restore iptables
+
+- name: Загрузка правил при старте
+  ansible.builtin.systemd:
+    name: netfilter-persistent
+    enabled: true
+
+- name: Разрешить SSH по паролю (для входа с centralRouter после knock)
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/00-password-auth.conf
+    content: "PasswordAuthentication yes\n"
+    mode: "0644"
+  notify: restart ssh
